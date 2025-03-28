@@ -9,8 +9,8 @@ This guide walks you through running a TPC-H performance benchmark test on Verti
 Unzip the TPC-H benchmark package and generate the dataset:
 
 ```bash
-unzip tpch-poc-1.0
-cd tpch-poc-1.0
+unzip tpch-poc-vertica
+cd tpch-poc-vertica
 
 # Replace 100 with the desired scale in GB (e.g., 50, 100, 1000)
 sh bin/gen_data/gen-tpch.sh 100 data_100
