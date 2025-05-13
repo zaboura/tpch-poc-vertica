@@ -20,6 +20,7 @@ vertica_user = config.get("vertica", "user")
 vertica_password = config.get("vertica", "password")
 vertica_database = config.get("vertica", "database")
 vertica_schema = config.get("vertica", "schema")
+vertica_ssl = config.getboolean("vertica", "ssl")
 sleep_ms = config.get("vertica", "sleep_ms", fallback="1000")
 
 # optional

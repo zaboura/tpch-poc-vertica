@@ -6,6 +6,11 @@ import argparse
 import logging
 import os
 import sys
+import warnings
+
+# Suppress all UserWarnings from vertica_python
+warnings.filterwarnings("ignore", category=UserWarning, module="vertica_python")
+
 
 from lib import conf_parser
 from lib.vertica_lib import VerticaLib
@@ -18,7 +23,12 @@ class VerticaDbTableOperation(object):
         self.lib = VerticaLib()
 
     def connect_vertica(self):
-        self.lib.connect()
+        try:
+            self.lib.connect()
+        except Exception as e:
+            print(e)
+            logging.critical("Cannot proceed without Vertica connection. Exiting.")
+            sys.exit(1)
 
     def close_vertica(self):
         self.lib.close()

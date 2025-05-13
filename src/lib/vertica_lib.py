@@ -31,6 +31,7 @@ class VerticaLib(object):
         self.user = conf_parser.vertica_user
         self.password = conf_parser.vertica_password
         self.database = conf_parser.vertica_database
+        self.ssl = conf_parser.vertica_ssl
 
         self.base_sql_file_dir = ConfigUtil.get_sql_dir()
         self.query_sql_dir = os.path.join(self.base_sql_file_dir, "query")
@@ -44,7 +45,8 @@ class VerticaLib(object):
             'port': self.port,
             'user': self.user,
             'password': self.password,
-            'database': self.database
+            'database': self.database,
+            'ssl': self.ssl
         }
         self.conn = vertica_python.connect(**conn_info)
         self.cursor = self.conn.cursor()
