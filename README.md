@@ -165,6 +165,20 @@ For each query, it runs:
 
 The recorded time is the average of the measured executions in milliseconds.
 
+To benchmark one separated query file, pass its path:
+
+```bash
+sh bin/benchmark.sh sql/tpch/query/tpch/q05.sql
+```
+
+To benchmark multiple separated query files, pass each path:
+
+```bash
+sh bin/benchmark.sh sql/tpch/query/tpch/q05.sql sql/tpch/query/tpch/q22.sql
+```
+
+When query file paths are provided, each file is treated as one query and the result label is the file name without `.sql`, for example `q05`.
+
 ## Results
 
 Benchmark results are written to:

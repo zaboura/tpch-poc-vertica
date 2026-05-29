@@ -25,8 +25,52 @@ schema=$(grep -w schema ${CONF_FILE} | awk '{print $2}')
 
 
 
-# SQL file containing queries (one per line)
-query_file=${BIN_PATH}/../sql/tpch/query/tpch.single_file/tpch_query.sql
+run_query() {
+    local query_label=$1
+    local query=$2
+
+    query="${query//__SCHEMA__/${schema}}"
+
+    sync  # flush disk caches (optional)
+    echo -ne "${query_label}\t" | tee -a result.csv
+
+    # Warm-up phase (runs the query 3 times without measuring)
+    for i in {1..3}; do
+        vsql -h "${v_host}" -p "${v_port}" -U "${user}" -w "${password}" -d "${database}" -c "${query}" > /dev/null 2>&1
+    done
+
+    # Run and time the query TRIES times
+    TRIES_TIME=0
+    for i in $(seq 1 ${TRIES}); do
+        START=$(date +%s%3N)  # Get start time in ms
+        vsql -h "${v_host}" -p "${v_port}" -U "${user}" -w "${password}" -d "${database}" -c "${query}" > /dev/null 2>&1
+        END=$(date +%s%3N)    # Get end time in ms
+        DIFF=$((END - START))
+        TRIES_TIME=$((TRIES_TIME + DIFF))
+    done
+
+    # Calculate average execution time in ms
+    TRIES_TIME_AVG=$((TRIES_TIME / TRIES))
+    echo -n "${TRIES_TIME_AVG}" | tee -a result.csv
+
+    # Update total time
+    Total=$((Total + TRIES_TIME_AVG))
+    echo "" | tee -a result.csv
+}
+
+read_sql_file() {
+    local sql_file=$1
+    local query=""
+    local line
+
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        line="${line#"${line%%[![:space:]]*}"}"
+        [[ -z "$line" || "$line" =~ ^-- ]] && continue
+        query+=" ${line}"
+    done < "${sql_file}"
+
+    echo "${query}"
+}
 
 # Header for CSV results
 echo -e "SQL\tTime(ms)" | tee -a result.csv
@@ -42,42 +86,32 @@ if [[ ! "$schema" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
     exit 1
 fi
 
-# Read each query from the SQL file
-while read -r query; do
-    # Skip empty lines or comment lines
-    [[ -z "$query" || "$query" =~ ^-- ]] && continue
+if [[ $# -eq 0 ]]; then
+    # Default: read each query from the single-file query list.
+    query_file=${BIN_PATH}/../sql/tpch/query/tpch.single_file/tpch_query.sql
 
-    query="${query//__SCHEMA__/${schema}}"
+    while IFS= read -r query || [[ -n "$query" ]]; do
+        [[ -z "$query" || "$query" =~ ^-- ]] && continue
+        run_query "Q${QUERY_NUM}" "${query}"
+        QUERY_NUM=$((QUERY_NUM + 1))
+    done < "${query_file}"
+else
+    # Optional mode: each argument is a separate SQL file to benchmark.
+    for sql_file in "$@"; do
+        if [[ ! -f "$sql_file" ]]; then
+            echo "[ERROR] SQL file does not exist: $sql_file"
+            exit 1
+        fi
 
-    sync  # flush disk caches (optional)
-    echo -ne "Q$QUERY_NUM\t" | tee -a result.csv
+        query=$(read_sql_file "$sql_file")
+        if [[ -z "$query" ]]; then
+            echo "[ERROR] SQL file has no executable query: $sql_file"
+            exit 1
+        fi
 
-    # Warm-up phase (runs the query 3 times without measuring)
-    for i in {1..3}; do
-        vsql -h ${v_host} -p ${v_port} -U ${user} -w ${password} -d ${database} -c "${query}" > /dev/null 2>&1
+        run_query "$(basename "$sql_file" .sql)" "${query}"
     done
-
-    # Run and time the query TRIES times
-    TRIES_TIME=0
-    for i in $(seq 1 $TRIES); do
-        START=$(date +%s%3N)  # Get start time in ms
-        vsql -h ${v_host} -p ${v_port} -U ${user} -w ${password} -d ${database} -c "${query}" > /dev/null 2>&1
-        END=$(date +%s%3N)    # Get end time in ms
-        DIFF=$((END - START))
-        TRIES_TIME=$((TRIES_TIME + DIFF))
-    done
-
-    # Calculate average execution time in ms
-    TRIES_TIME_AVG=$((TRIES_TIME / TRIES))
-    echo -n "${TRIES_TIME_AVG}" | tee -a result.csv
-
-    # Update total time
-    Total=$((Total + TRIES_TIME_AVG))
-    echo "" | tee -a result.csv
-
-    # Increment query counter
-    QUERY_NUM=$((QUERY_NUM + 1))
-done < ${query_file}
+fi
 
 # Final total
 echo -e "Total\t$Total" | tee -a result.csv
