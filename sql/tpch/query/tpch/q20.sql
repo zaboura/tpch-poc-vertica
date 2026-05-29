@@ -2,20 +2,20 @@ select
   s_name,
   s_address
 from
-  supplier,
-  nation
+  __SCHEMA__.supplier,
+  __SCHEMA__.nation
 where
   s_suppkey in (
     select
       ps_suppkey
     from
-      partsupp
+      __SCHEMA__.partsupp
     where
       ps_partkey in (
         select
           p_partkey
         from
-          part
+          __SCHEMA__.part
         where
           p_name like 'forest%'
       )   
@@ -23,7 +23,7 @@ where
         select
           0.5 * sum(l_quantity)
         from
-          lineitem
+          __SCHEMA__.lineitem
         where
           l_partkey = ps_partkey
           and l_suppkey = ps_suppkey

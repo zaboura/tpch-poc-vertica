@@ -1,7 +1,7 @@
 select
   o_year,
   sum(case
-    when nation = 'BRAZIL' then volume
+    when __SCHEMA__.nation = 'BRAZIL' then volume
     else 0
   end) / sum(volume) as mkt_share
 from
@@ -9,16 +9,16 @@ from
     select
       extract(year from o_orderdate) as o_year,
       l_extendedprice * (1 - l_discount) as volume,
-      n2.n_name as nation
+      n2.n_name as __SCHEMA__.nation
     from
-      part,
-      supplier,
-      lineitem,
-      orders,
-      customer,
-      nation n1, 
-      nation n2, 
-      region
+      __SCHEMA__.part,
+      __SCHEMA__.supplier,
+      __SCHEMA__.lineitem,
+      __SCHEMA__.orders,
+      __SCHEMA__.customer,
+      __SCHEMA__.nation n1, 
+      __SCHEMA__.nation n2, 
+      __SCHEMA__.region
     where
       p_partkey = l_partkey
       and s_suppkey = l_suppkey

@@ -8,11 +8,11 @@ select
   s_phone,
   s_comment
 from
-  part,
-  supplier,
-  partsupp,
-  nation,
-  region
+  __SCHEMA__.part,
+  __SCHEMA__.supplier,
+  __SCHEMA__.partsupp,
+  __SCHEMA__.nation,
+  __SCHEMA__.region
 where
   p_partkey = ps_partkey
   and s_suppkey = ps_suppkey
@@ -25,10 +25,10 @@ where
     select
       min(ps_supplycost)
     from
-      partsupp,
-      supplier,
-      nation,
-      region
+      __SCHEMA__.partsupp,
+      __SCHEMA__.supplier,
+      __SCHEMA__.nation,
+      __SCHEMA__.region
     where
       p_partkey = ps_partkey
       and s_suppkey = ps_suppkey

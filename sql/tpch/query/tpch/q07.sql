@@ -11,12 +11,12 @@ from
       extract(year from l_shipdate) as l_year,
       l_extendedprice * (1 - l_discount) as volume
     from
-      supplier,
-      lineitem,
-      orders,
-      customer,
-      nation n1, 
-      nation n2
+      __SCHEMA__.supplier,
+      __SCHEMA__.lineitem,
+      __SCHEMA__.orders,
+      __SCHEMA__.customer,
+      __SCHEMA__.nation n1, 
+      __SCHEMA__.nation n2
     where
       s_suppkey = l_suppkey
       and o_orderkey = l_orderkey

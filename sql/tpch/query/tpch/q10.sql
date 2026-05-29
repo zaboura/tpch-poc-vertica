@@ -8,10 +8,10 @@ select
       c_phone,
       c_comment
     from
-      customer,
-      orders,
-      lineitem,
-      nation
+      __SCHEMA__.customer,
+      __SCHEMA__.orders,
+      __SCHEMA__.lineitem,
+      __SCHEMA__.nation
     where
       c_custkey = o_custkey
       and l_orderkey = o_orderkey

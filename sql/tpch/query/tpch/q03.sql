@@ -4,9 +4,9 @@ select
   o_orderdate,
   o_shippriority
 from
-  customer,
-  orders,
-  lineitem
+  __SCHEMA__.customer,
+  __SCHEMA__.orders,
+  __SCHEMA__.lineitem
 where
   c_mktsegment = 'BUILDING'
   and c_custkey = o_custkey

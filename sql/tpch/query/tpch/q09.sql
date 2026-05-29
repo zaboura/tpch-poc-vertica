@@ -1,20 +1,20 @@
 select
-  nation,
+  __SCHEMA__.nation,
   o_year,
   sum(amount) as sum_profit
 from
   (
     select
-      n_name as nation,
+      n_name as __SCHEMA__.nation,
       extract(year from o_orderdate) as o_year,
       l_extendedprice * (1 - l_discount) - ps_supplycost * l_quantity as amount
     from
-      part,
-      supplier,
-      lineitem,
-      partsupp,
-      orders,
-      nation
+      __SCHEMA__.part,
+      __SCHEMA__.supplier,
+      __SCHEMA__.lineitem,
+      __SCHEMA__.partsupp,
+      __SCHEMA__.orders,
+      __SCHEMA__.nation
     where
       s_suppkey = l_suppkey
       and ps_suppkey = l_suppkey
@@ -25,8 +25,8 @@ from
       and p_name like '%green%'
   ) as profit
 group by
-  nation,
+  __SCHEMA__.nation,
   o_year
 order by
-  nation,
+  __SCHEMA__.nation,
   o_year desc;

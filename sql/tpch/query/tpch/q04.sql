@@ -2,7 +2,7 @@ select
   o_orderpriority,
   count(*) as order_count
 from
-  orders
+  __SCHEMA__.orders
 where
   o_orderdate >= date '1993-07-01'
   and o_orderdate < date '1993-07-01' + interval '3' month
@@ -10,7 +10,7 @@ where
     select
       *   
     from
-      lineitem
+      __SCHEMA__.lineitem
     where
       l_orderkey = o_orderkey
       and l_commitdate < l_receiptdate

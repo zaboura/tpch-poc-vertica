@@ -2,10 +2,10 @@ select
         s_name,
         count(*) as numwait
 from
-        supplier,
-        lineitem l1,
-        orders,
-        nation
+        __SCHEMA__.supplier,
+        __SCHEMA__.lineitem l1,
+        __SCHEMA__.orders,
+        __SCHEMA__.nation
 where
         s_suppkey = l1.l_suppkey
         and o_orderkey = l1.l_orderkey
@@ -15,7 +15,7 @@ where
                 select
                         *
                 from
-                        lineitem l2
+                        __SCHEMA__.lineitem l2
                 where
                         l2.l_orderkey = l1.l_orderkey
                         and l2.l_suppkey <> l1.l_suppkey
@@ -24,7 +24,7 @@ where
                 select
                         *
                 from
-                        lineitem l3
+                        __SCHEMA__.lineitem l3
                 where
                         l3.l_orderkey = l1.l_orderkey
                         and l3.l_suppkey <> l1.l_suppkey

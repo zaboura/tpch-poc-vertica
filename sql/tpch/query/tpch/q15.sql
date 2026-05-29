@@ -3,7 +3,7 @@ with  revenue0 (supplier_no, total_revenue) as (
         l_suppkey,
         sum(l_extendedprice * (1 - l_discount))
     from
-        lineitem
+        __SCHEMA__.lineitem
     where
         l_shipdate >= date '1996-01-01' and l_shipdate < date '1996-01-01' + interval '3' month
     group by
@@ -16,7 +16,7 @@ select
   s_phone,
   total_revenue
 from
-  supplier,
+  __SCHEMA__.supplier,
   revenue0
 where
   s_suppkey = supplier_no
