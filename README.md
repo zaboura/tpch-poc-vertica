@@ -1,6 +1,8 @@
 # Vertica TPC-H Benchmark Guide
 
-This repository provides scripts and SQL files for running a TPC-H style benchmark against a Vertica database. The normal workflow is:
+This repository provides scripts and SQL files for running a TPC-H style benchmark against a Vertica database. It includes Vertica-specific table creation, data loading, and benchmark execution scripts.
+
+The normal workflow is:
 
 1. Configure the Vertica connection.
 2. Generate TPC-H `.tbl` data files.
@@ -9,6 +11,23 @@ This repository provides scripts and SQL files for running a TPC-H style benchma
 5. Run the benchmark queries and review `result.csv`.
 
 Run the commands below from the repository root unless noted otherwise.
+
+## Project Layout
+
+- `bin`: Shell scripts for data generation, table creation, data loading, and benchmark execution.
+- `conf`: Vertica connection and benchmark configuration.
+- `sql/tpch`: TPC-H DDL and query SQL files.
+- `src`: Python helper code used by the table creation flow.
+- `thirdparty/tpch-dbgen`: Bundled TPC-H `dbgen` utility used to generate benchmark data.
+
+## Scripts
+
+The main scripts are:
+
+- `bin/gen_data/gen-tpch.sh`: Generates TPC-H `.tbl` data files.
+- `bin/create_db_table.sh`: Creates the schema and tables from a selected DDL directory.
+- `bin/load_data.sh`: Loads generated `.tbl*` files into Vertica with `COPY`.
+- `bin/benchmark.sh`: Runs the TPC-H query suite and writes timings to `result.csv`.
 
 ## Prerequisites
 
@@ -22,6 +41,8 @@ The benchmark scripts expect these tools to already be available:
 - Access to an existing Vertica database.
 
 This project does not create the Vertica database or install dependencies for you. Create the database and install/configure the required tools before running the benchmark.
+
+If `thirdparty/tpch-dbgen/dbgen` is missing or not executable on your platform, build it from the `thirdparty/tpch-dbgen` directory before generating data.
 
 ## Configure Vertica
 
@@ -71,6 +92,8 @@ sh bin/gen_data/gen-tpch.sh 100 data_100
 The script writes TPC-H `.tbl` files under the data directory. For larger scale factors, some large tables may be split into multiple `.tbl*` fragments.
 
 Generated `data_*` directories are ignored by Git.
+
+The `gen-tpch.sh` script is a convenience wrapper around `thirdparty/tpch-dbgen/dbgen`. `tpch-dbgen`/`dbgen` is the TPC-H data generator associated with the Transaction Processing Performance Council (TPC).
 
 ## Create Tables
 
@@ -155,3 +178,7 @@ The file is created in the current working directory. If you run `sh bin/benchma
 ```
 
 `result.csv` is overwritten at the start of every benchmark run and is ignored by Git. Copy or rename it before running another benchmark if you want to keep historical results.
+
+## Third-party Components
+
+TPC-H data generation uses the bundled `thirdparty/tpch-dbgen` utility. `tpch-dbgen`/`dbgen` is the TPC-H data generator associated with the Transaction Processing Performance Council (TPC).
