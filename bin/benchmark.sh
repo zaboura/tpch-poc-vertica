@@ -21,6 +21,7 @@ v_port=$(grep -w port ${CONF_FILE} | awk '{print $2}')
 user=$(grep -w user ${CONF_FILE} | awk '{print $2}')
 password=$(grep -w password ${CONF_FILE} | awk '{print $2}')
 database=$(grep -w database ${CONF_FILE} | awk '{print $2}')
+schema=$(grep -w schema ${CONF_FILE} | awk '{print $2}')
 
 
 
@@ -31,8 +32,13 @@ query_file=${BIN_PATH}/../sql/tpch/query/tpch.single_file/tpch_query.sql
 echo -e "SQL\tTime(ms)" | tee -a result.csv
 Total=0
 
-if [[ -z "$v_host" || -z "$user" || -z "$v_port" || -z "$password" || -z "$database" ]]; then
+if [[ -z "$v_host" || -z "$user" || -z "$v_port" || -z "$password" || -z "$database" || -z "$schema" ]]; then
     echo "[ERROR] Missing Vertica config values from: $CONF_FILE"
+    exit 1
+fi
+
+if [[ ! "$schema" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+    echo "[ERROR] Invalid schema name '$schema'. Use an unquoted Vertica identifier, for example: tpch or benchmark_tpch."
     exit 1
 fi
 
@@ -40,6 +46,8 @@ fi
 while read -r query; do
     # Skip empty lines or comment lines
     [[ -z "$query" || "$query" =~ ^-- ]] && continue
+
+    query="${query//tpch./${schema}.}"
 
     sync  # flush disk caches (optional)
     echo -ne "Q$QUERY_NUM\t" | tee -a result.csv

@@ -23,6 +23,16 @@ v_pass=$(grep -w password "${CONF_FILE}" | awk '{print $2}')
 v_db=$(grep -w database "${CONF_FILE}" | awk '{print $2}')
 v_schema=$(grep -w schema "${CONF_FILE}" | awk '{print $2}')
 
+if [[ -z "$v_host" || -z "$v_user" || -z "$v_port" || -z "$v_pass" || -z "$v_db" || -z "$v_schema" ]]; then
+    echo "[ERROR] Missing Vertica config values from: $CONF_FILE"
+    exit 1
+fi
+
+if [[ ! "$v_schema" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+    echo "[ERROR] Invalid schema name '$v_schema'. Use an unquoted Vertica identifier, for example: tpch or benchmark_tpch."
+    exit 1
+fi
+
 echo "[INFO] Loading data into Vertica schema '${v_schema}' from directory: ${data_dir}"
 echo "[INFO] Connecting to ${v_user}@${v_host}:${v_port}/${v_db}"
 

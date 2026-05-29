@@ -5,6 +5,7 @@
 import logging
 import os
 import random
+import re
 import time
 
 import vertica_python
@@ -31,6 +32,7 @@ class VerticaLib(object):
         self.user = conf_parser.vertica_user
         self.password = conf_parser.vertica_password
         self.database = conf_parser.vertica_database
+        self.schema = conf_parser.vertica_schema
         self.ssl = conf_parser.vertica_ssl
 
         self.base_sql_file_dir = ConfigUtil.get_sql_dir()
@@ -57,8 +59,30 @@ class VerticaLib(object):
         if self.conn:
             self.conn.close()
             
+    def validate_schema_name(self, schema_name):
+        schema = schema_name.strip()
+        if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", schema):
+            raise VerticaException(
+                "Invalid schema name '%s'. Use an unquoted Vertica identifier, for example: tpch or benchmark_tpch."
+                % schema
+            )
+        return schema
+
     def create_schema(self, schema_name):
-        return self.execute_sql(f"CREATE SCHEMA IF NOT EXISTS {schema_name}", "ddl")
+        schema = self.validate_schema_name(schema_name)
+        return self.execute_sql(f"CREATE SCHEMA IF NOT EXISTS {schema}", "ddl")
+
+    def apply_configured_schema(self, sql):
+        schema = self.validate_schema_name(self.schema)
+
+        sql = re.sub(r"\btpch\.", "%s." % schema, sql, flags=re.IGNORECASE)
+        sql = re.sub(
+            r"(\b(?:DROP|CREATE)\s+SCHEMA\s+(?:IF\s+(?:NOT\s+)?EXISTS\s+)?)tpch\b",
+            r"\1%s" % schema,
+            sql,
+            flags=re.IGNORECASE,
+        )
+        return sql
 
 
     def execute_sql(self, sql, sql_type):
@@ -82,7 +106,7 @@ class VerticaLib(object):
                 line = line.strip()
                 if not line.startswith("--"):
                     sql += " " + line
-        return sql
+        return self.apply_configured_schema(sql)
 
     def get_sqls_from_dir(self, dir_path):
         logging.info("Loading SQLs from dir: %s", dir_path)

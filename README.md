@@ -59,7 +59,7 @@ The scripts read these values from the `[vertica]` section:
 - `user`: Vertica user.
 - `password`: Password for the Vertica user.
 - `database`: Existing Vertica database to connect to.
-- `schema`: Schema used for the TPC-H tables, for example `tpch`.
+- `schema`: Schema used for the TPC-H tables, for example `tpch` or `benchmark_tpch`.
 - `ssl`: `True` or `False`.
 
 Example:
@@ -74,6 +74,8 @@ database: <vertica-database>
 schema: <vertica-schema>
 ssl: False
 ```
+
+Use an unquoted Vertica identifier for `schema`: letters, numbers, and underscores only, starting with a letter or underscore. The bundled SQL files may contain `tpch` as the schema name, but the create-table and benchmark scripts replace those references with the schema configured here at runtime.
 
 ## Generate TPC-H Data
 
@@ -118,7 +120,7 @@ Available DDL directories under `sql/tpch` include:
 - `ddl_1000`: DDL for a 1 TB benchmark.
 - `ddl_opt`: Optimized/experimental Vertica DDL with projections and segmentation.
 
-Important DDL note: if you want to optimize the benchmark by changing table layouts, projections, segmentation, encodings, partitioning, or column order, update the table definitions before creating the tables. The load script uses `COPY` without an explicit column list, so the table definitions must stay compatible with the generated `.tbl` file layout and with the benchmark queries.
+Important DDL note: if you want to optimize the benchmark by changing table layouts, projections, segmentation, encodings, partitioning, or column order, update the table definitions before creating the tables. The table creation flow automatically maps `tpch` schema references in DDL files to the schema from `conf/vertica.conf`, but it does not redesign table layouts for you. The load script uses `COPY` without an explicit column list, so the table definitions must stay compatible with the generated `.tbl` file layout and with the benchmark queries.
 
 ## Load Data
 
