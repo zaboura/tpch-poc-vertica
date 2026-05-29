@@ -61,6 +61,8 @@ The scripts read these values from the `[vertica]` section:
 - `database`: Existing Vertica database to connect to.
 - `schema`: Schema used for the TPC-H tables, for example `tpch` or `benchmark_tpch`.
 - `ssl`: `True` or `False`.
+- `warmup_runs`: Number of unmeasured warm-up executions per query.
+- `tries`: Number of measured executions per query.
 
 Example:
 
@@ -73,6 +75,8 @@ password: <vertica-password>
 database: <vertica-database>
 schema: <vertica-schema>
 ssl: False
+warmup_runs: 3
+tries: 3
 ```
 
 Use an unquoted Vertica identifier for `schema`: letters, numbers, and underscores only, starting with a letter or underscore. The bundled SQL files use the `__SCHEMA__` placeholder, and the create-table and benchmark scripts replace it with the schema configured here at runtime.
@@ -160,8 +164,8 @@ sql/tpch/query/tpch.single_file/tpch_query.sql
 
 For each query, it runs:
 
-- 3 warm-up executions that are not measured.
-- 3 measured executions.
+- `warmup_runs` unmeasured warm-up executions.
+- `tries` measured executions.
 
 The recorded time is the average of the measured executions in milliseconds.
 

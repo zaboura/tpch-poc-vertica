@@ -10,7 +10,6 @@ CONF_FILE=${BIN_PATH}/../conf/vertica.conf
 
 # Set initial values
 QUERY_NUM=1
-TRIES=3
 
 touch result.csv
 truncate -s0 result.csv
@@ -22,7 +21,11 @@ user=$(grep -w user ${CONF_FILE} | awk '{print $2}')
 password=$(grep -w password ${CONF_FILE} | awk '{print $2}')
 database=$(grep -w database ${CONF_FILE} | awk '{print $2}')
 schema=$(grep -w schema ${CONF_FILE} | awk '{print $2}')
+warmup_runs=$(grep -w warmup_runs ${CONF_FILE} | awk '{print $2}')
+tries=$(grep -w tries ${CONF_FILE} | awk '{print $2}')
 
+warmup_runs=${warmup_runs:-3}
+tries=${tries:-3}
 
 
 run_query() {
@@ -35,8 +38,8 @@ run_query() {
     sync  # flush disk caches (optional)
     echo -ne "${query_label}\t" | tee -a result.csv
 
-    # Warm-up phase (runs the query 3 times without measuring)
-    for i in {1..3}; do
+    # Warm-up phase (runs the query without measuring)
+    for i in $(seq 1 ${warmup_runs}); do
         if ! query_output=$(vsql -h "${v_host}" -p "${v_port}" -U "${user}" -w "${password}" -d "${database}" -c "${query}" 2>&1 > /dev/null); then
             echo "" | tee -a result.csv
             echo "[ERROR] ${query_label} failed during warm-up run ${i}" >&2
@@ -45,9 +48,9 @@ run_query() {
         fi
     done
 
-    # Run and time the query TRIES times
+    # Run and time the query tries times
     TRIES_TIME=0
-    for i in $(seq 1 ${TRIES}); do
+    for i in $(seq 1 ${tries}); do
         START=$(date +%s%3N)  # Get start time in ms
         if ! query_output=$(vsql -h "${v_host}" -p "${v_port}" -U "${user}" -w "${password}" -d "${database}" -c "${query}" 2>&1 > /dev/null); then
             echo "" | tee -a result.csv
@@ -61,7 +64,7 @@ run_query() {
     done
 
     # Calculate average execution time in ms
-    TRIES_TIME_AVG=$((TRIES_TIME / TRIES))
+    TRIES_TIME_AVG=$((TRIES_TIME / tries))
     echo -n "${TRIES_TIME_AVG}" | tee -a result.csv
 
     # Update total time
@@ -94,6 +97,16 @@ fi
 
 if [[ ! "$schema" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
     echo "[ERROR] Invalid schema name '$schema'. Use an unquoted Vertica identifier, for example: tpch or benchmark_tpch."
+    exit 1
+fi
+
+if [[ ! "$warmup_runs" =~ ^[0-9]+$ || "$warmup_runs" -lt 1 ]]; then
+    echo "[ERROR] Invalid warmup_runs '$warmup_runs'. Use a positive integer."
+    exit 1
+fi
+
+if [[ ! "$tries" =~ ^[0-9]+$ || "$tries" -lt 1 ]]; then
+    echo "[ERROR] Invalid tries '$tries'. Use a positive integer."
     exit 1
 fi
 
