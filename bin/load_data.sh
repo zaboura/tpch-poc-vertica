@@ -37,28 +37,54 @@ echo "[INFO] Loading data into Vertica schema '${v_schema}' from directory: ${da
 echo "[INFO] Connecting to ${v_user}@${v_host}:${v_port}/${v_db}"
 
 vsql_args=(-h "$v_host" -p "$v_port" -U "$v_user" -d "$v_db")
-if [[ -n "$v_pass" ]]; then
-    vsql_args+=(-w "$v_pass")
-fi
+
+run_vsql() {
+    if [[ -n "$v_pass" ]]; then
+        VSQL_PASSWORD="$v_pass" vsql "${vsql_args[@]}" "$@"
+    else
+        vsql "${vsql_args[@]}" "$@"
+    fi
+}
+
+is_allowed_table() {
+    case "$1" in
+        customer|lineitem|nation|orders|part|partsupp|region|supplier)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
 
 # Identify unique table prefixes: e.g., customer, lineitem, etc.
 for base in $(ls "${data_dir}"/*.tbl* 2>/dev/null | sed -E 's/.*\/(.*)\.tbl.*/\1/' | sort -u); do
+    if ! is_allowed_table "$base"; then
+        echo "[ERROR] Unsafe table name derived from file: $base"
+        exit 1
+    fi
+
     echo "[INFO] ────────────────────────────────────────────────"
     echo "[INFO] Loading table: ${v_schema}.${base}"
 
     start=$(date +%s)
 
     for file in "${data_dir}/${base}.tbl"*; do
+        if [[ "$file" == *"'"* ]]; then
+            echo "[ERROR] Unsafe data file path contains a single quote: $file"
+            exit 1
+        fi
+
         echo "[INFO] Loading fragment: ${file}"
 
-        vsql "${vsql_args[@]}" -c \
+        run_vsql -c \
           "COPY ${v_schema}.${base} FROM LOCAL '${file}' DELIMITER '|' NULL '' DIRECT;"
     done
 
     end=$(date +%s)
     duration=$((end - start))
 
-    row_count=$(vsql "${vsql_args[@]}" -At -c \
+    row_count=$(run_vsql -At -c \
         "SELECT COUNT(*) FROM ${v_schema}.${base};")
 
     echo "[INFO] Load completed for ${v_schema}.${base} in ${duration}s"

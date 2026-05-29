@@ -15,14 +15,14 @@ touch result.csv
 truncate -s0 result.csv
 
 # Read Vertica config values from conf file
-v_host=$(grep -w host ${CONF_FILE} | awk '{print $2}')
-v_port=$(grep -w port ${CONF_FILE} | awk '{print $2}')
-user=$(grep -w user ${CONF_FILE} | awk '{print $2}')
-password=$(grep -w password ${CONF_FILE} | awk '{print $2}')
-database=$(grep -w database ${CONF_FILE} | awk '{print $2}')
-schema=$(grep -w schema ${CONF_FILE} | awk '{print $2}')
-warmup_runs=$(grep -w warmup_runs ${CONF_FILE} | awk '{print $2}')
-tries=$(grep -w tries ${CONF_FILE} | awk '{print $2}')
+v_host=$(grep -w host "${CONF_FILE}" | awk '{print $2}')
+v_port=$(grep -w port "${CONF_FILE}" | awk '{print $2}')
+user=$(grep -w user "${CONF_FILE}" | awk '{print $2}')
+password=$(grep -w password "${CONF_FILE}" | awk '{print $2}')
+database=$(grep -w database "${CONF_FILE}" | awk '{print $2}')
+schema=$(grep -w schema "${CONF_FILE}" | awk '{print $2}')
+warmup_runs=$(grep -w warmup_runs "${CONF_FILE}" | awk '{print $2}')
+tries=$(grep -w tries "${CONF_FILE}" | awk '{print $2}')
 
 warmup_runs=${warmup_runs:-3}
 tries=${tries:-3}
@@ -40,7 +40,7 @@ run_query() {
 
     # Warm-up phase (runs the query without measuring)
     for i in $(seq 1 ${warmup_runs}); do
-        if ! query_output=$(vsql "${vsql_args[@]}" -c "${query}" 2>&1 > /dev/null); then
+        if ! query_output=$(run_vsql -c "${query}" 2>&1 > /dev/null); then
             echo "" | tee -a result.csv
             echo "[ERROR] ${query_label} failed during warm-up run ${i}" >&2
             echo "${query_output}" >&2
@@ -52,7 +52,7 @@ run_query() {
     TRIES_TIME=0
     for i in $(seq 1 ${tries}); do
         START=$(date +%s%3N)  # Get start time in ms
-        if ! query_output=$(vsql "${vsql_args[@]}" -c "${query}" 2>&1 > /dev/null); then
+        if ! query_output=$(run_vsql -c "${query}" 2>&1 > /dev/null); then
             echo "" | tee -a result.csv
             echo "[ERROR] ${query_label} failed during measured run ${i}" >&2
             echo "${query_output}" >&2
@@ -86,6 +86,14 @@ read_sql_file() {
     echo "${query}"
 }
 
+run_vsql() {
+    if [[ -n "$password" ]]; then
+        VSQL_PASSWORD="$password" vsql "${vsql_args[@]}" "$@"
+    else
+        vsql "${vsql_args[@]}" "$@"
+    fi
+}
+
 # Header for CSV results
 echo -e "SQL\tTime(ms)" | tee -a result.csv
 Total=0
@@ -111,9 +119,6 @@ if [[ ! "$tries" =~ ^[0-9]+$ || "$tries" -lt 1 ]]; then
 fi
 
 vsql_args=(-h "$v_host" -p "$v_port" -U "$user" -d "$database")
-if [[ -n "$password" ]]; then
-    vsql_args+=(-w "$password")
-fi
 
 if [[ $# -eq 0 ]]; then
     # Default: read each query from the single-file query list.

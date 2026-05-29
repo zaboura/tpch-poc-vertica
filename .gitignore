@@ -1,4 +1,6 @@
 .qodo
+conf/vertica.conf
+result.csv
 *.csv
 data_[0-9]*/
 __pycache__/

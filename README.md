@@ -46,11 +46,14 @@ If `thirdparty/tpch-dbgen/dbgen` is missing or not executable on your platform, 
 
 ## Configure Vertica
 
-Edit `conf/vertica.conf` so it points to your Vertica cluster:
+Create a local Vertica config from the tracked example file, then edit it so it points to your Vertica cluster:
 
 ```bash
+cp conf/vertica.conf.example conf/vertica.conf
 nano conf/vertica.conf
 ```
+
+`conf/vertica.conf` is ignored by Git so local credentials are not committed.
 
 The scripts read these values from the `[vertica]` section:
 

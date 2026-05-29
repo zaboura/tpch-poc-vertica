@@ -2,7 +2,7 @@
 host: <vertica-host>
 port: 5433
 user: <vertica-user>
-password: <vertica-password>
+password:
 database: <vertica-database>
 schema: <vertica-schema>
 ssl: False
