@@ -46,10 +46,11 @@ class VerticaLib(object):
             'host': self.host,
             'port': self.port,
             'user': self.user,
-            'password': self.password,
             'database': self.database,
             'ssl': self.ssl
         }
+        if self.password:
+            conn_info['password'] = self.password
         self.conn = vertica_python.connect(**conn_info)
         self.cursor = self.conn.cursor()
 

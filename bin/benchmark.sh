@@ -40,7 +40,7 @@ run_query() {
 
     # Warm-up phase (runs the query without measuring)
     for i in $(seq 1 ${warmup_runs}); do
-        if ! query_output=$(vsql -h "${v_host}" -p "${v_port}" -U "${user}" -w "${password}" -d "${database}" -c "${query}" 2>&1 > /dev/null); then
+        if ! query_output=$(vsql "${vsql_args[@]}" -c "${query}" 2>&1 > /dev/null); then
             echo "" | tee -a result.csv
             echo "[ERROR] ${query_label} failed during warm-up run ${i}" >&2
             echo "${query_output}" >&2
@@ -52,7 +52,7 @@ run_query() {
     TRIES_TIME=0
     for i in $(seq 1 ${tries}); do
         START=$(date +%s%3N)  # Get start time in ms
-        if ! query_output=$(vsql -h "${v_host}" -p "${v_port}" -U "${user}" -w "${password}" -d "${database}" -c "${query}" 2>&1 > /dev/null); then
+        if ! query_output=$(vsql "${vsql_args[@]}" -c "${query}" 2>&1 > /dev/null); then
             echo "" | tee -a result.csv
             echo "[ERROR] ${query_label} failed during measured run ${i}" >&2
             echo "${query_output}" >&2
@@ -90,7 +90,7 @@ read_sql_file() {
 echo -e "SQL\tTime(ms)" | tee -a result.csv
 Total=0
 
-if [[ -z "$v_host" || -z "$user" || -z "$v_port" || -z "$password" || -z "$database" || -z "$schema" ]]; then
+if [[ -z "$v_host" || -z "$user" || -z "$v_port" || -z "$database" || -z "$schema" ]]; then
     echo "[ERROR] Missing Vertica config values from: $CONF_FILE"
     exit 1
 fi
@@ -108,6 +108,11 @@ fi
 if [[ ! "$tries" =~ ^[0-9]+$ || "$tries" -lt 1 ]]; then
     echo "[ERROR] Invalid tries '$tries'. Use a positive integer."
     exit 1
+fi
+
+vsql_args=(-h "$v_host" -p "$v_port" -U "$user" -d "$database")
+if [[ -n "$password" ]]; then
+    vsql_args+=(-w "$password")
 fi
 
 if [[ $# -eq 0 ]]; then

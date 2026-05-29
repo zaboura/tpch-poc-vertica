@@ -57,7 +57,7 @@ The scripts read these values from the `[vertica]` section:
 - `host`: Vertica host or IP address.
 - `port`: Vertica port, usually `5433`.
 - `user`: Vertica user.
-- `password`: Password for the Vertica user.
+- `password`: Password for the Vertica user. Leave empty for passwordless authentication.
 - `database`: Existing Vertica database to connect to.
 - `schema`: Schema used for the TPC-H tables, for example `tpch` or `benchmark_tpch`.
 - `ssl`: `True` or `False`.

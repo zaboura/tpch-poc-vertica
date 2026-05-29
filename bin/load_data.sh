@@ -23,7 +23,7 @@ v_pass=$(grep -w password "${CONF_FILE}" | awk '{print $2}')
 v_db=$(grep -w database "${CONF_FILE}" | awk '{print $2}')
 v_schema=$(grep -w schema "${CONF_FILE}" | awk '{print $2}')
 
-if [[ -z "$v_host" || -z "$v_user" || -z "$v_port" || -z "$v_pass" || -z "$v_db" || -z "$v_schema" ]]; then
+if [[ -z "$v_host" || -z "$v_user" || -z "$v_port" || -z "$v_db" || -z "$v_schema" ]]; then
     echo "[ERROR] Missing Vertica config values from: $CONF_FILE"
     exit 1
 fi
@@ -36,6 +36,11 @@ fi
 echo "[INFO] Loading data into Vertica schema '${v_schema}' from directory: ${data_dir}"
 echo "[INFO] Connecting to ${v_user}@${v_host}:${v_port}/${v_db}"
 
+vsql_args=(-h "$v_host" -p "$v_port" -U "$v_user" -d "$v_db")
+if [[ -n "$v_pass" ]]; then
+    vsql_args+=(-w "$v_pass")
+fi
+
 # Identify unique table prefixes: e.g., customer, lineitem, etc.
 for base in $(ls "${data_dir}"/*.tbl* 2>/dev/null | sed -E 's/.*\/(.*)\.tbl.*/\1/' | sort -u); do
     echo "[INFO] ────────────────────────────────────────────────"
@@ -46,14 +51,14 @@ for base in $(ls "${data_dir}"/*.tbl* 2>/dev/null | sed -E 's/.*\/(.*)\.tbl.*/\1
     for file in "${data_dir}/${base}.tbl"*; do
         echo "[INFO] Loading fragment: ${file}"
 
-        vsql -h "$v_host" -p "$v_port" -U "$v_user" -w "$v_pass" -d "$v_db" -c \
+        vsql "${vsql_args[@]}" -c \
           "COPY ${v_schema}.${base} FROM LOCAL '${file}' DELIMITER '|' NULL '' DIRECT;"
     done
 
     end=$(date +%s)
     duration=$((end - start))
 
-    row_count=$(vsql -h "$v_host" -p "$v_port" -U "$v_user" -w "$v_pass" -d "$v_db" -At -c \
+    row_count=$(vsql "${vsql_args[@]}" -At -c \
         "SELECT COUNT(*) FROM ${v_schema}.${base};")
 
     echo "[INFO] Load completed for ${v_schema}.${base} in ${duration}s"
