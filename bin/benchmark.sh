@@ -28,6 +28,7 @@ schema=$(grep -w schema ${CONF_FILE} | awk '{print $2}')
 run_query() {
     local query_label=$1
     local query=$2
+    local query_output
 
     query="${query//__SCHEMA__/${schema}}"
 
@@ -36,14 +37,24 @@ run_query() {
 
     # Warm-up phase (runs the query 3 times without measuring)
     for i in {1..3}; do
-        vsql -h "${v_host}" -p "${v_port}" -U "${user}" -w "${password}" -d "${database}" -c "${query}" > /dev/null 2>&1
+        if ! query_output=$(vsql -h "${v_host}" -p "${v_port}" -U "${user}" -w "${password}" -d "${database}" -c "${query}" 2>&1 > /dev/null); then
+            echo "" | tee -a result.csv
+            echo "[ERROR] ${query_label} failed during warm-up run ${i}" >&2
+            echo "${query_output}" >&2
+            exit 1
+        fi
     done
 
     # Run and time the query TRIES times
     TRIES_TIME=0
     for i in $(seq 1 ${TRIES}); do
         START=$(date +%s%3N)  # Get start time in ms
-        vsql -h "${v_host}" -p "${v_port}" -U "${user}" -w "${password}" -d "${database}" -c "${query}" > /dev/null 2>&1
+        if ! query_output=$(vsql -h "${v_host}" -p "${v_port}" -U "${user}" -w "${password}" -d "${database}" -c "${query}" 2>&1 > /dev/null); then
+            echo "" | tee -a result.csv
+            echo "[ERROR] ${query_label} failed during measured run ${i}" >&2
+            echo "${query_output}" >&2
+            exit 1
+        fi
         END=$(date +%s%3N)    # Get end time in ms
         DIFF=$((END - START))
         TRIES_TIME=$((TRIES_TIME + DIFF))
