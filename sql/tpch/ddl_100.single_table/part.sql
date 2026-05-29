@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS tpch.part;
-CREATE TABLE tpch.part (
+DROP TABLE IF EXISTS __SCHEMA__.part;
+CREATE TABLE __SCHEMA__.part (
     p_partkey     INT NOT NULL,
     p_name        VARCHAR(55) NOT NULL,
     p_mfgr        VARCHAR(25) NOT NULL,

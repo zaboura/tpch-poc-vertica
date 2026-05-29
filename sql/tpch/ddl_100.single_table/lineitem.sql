@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS tpch.lineitem;
-CREATE TABLE tpch.lineitem (
+DROP TABLE IF EXISTS __SCHEMA__.lineitem;
+CREATE TABLE __SCHEMA__.lineitem (
     l_shipdate    DATE NOT NULL,
     l_orderkey    INT NOT NULL,
     l_linenumber  INT NOT NULL,

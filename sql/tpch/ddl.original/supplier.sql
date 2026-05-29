@@ -1,4 +1,4 @@
-CREATE TABLE tpch.supplier (
+CREATE TABLE __SCHEMA__.supplier (
     s_suppkey   INT NOT NULL,
     s_name      VARCHAR(25) NOT NULL,
     s_address   VARCHAR(40) NOT NULL,

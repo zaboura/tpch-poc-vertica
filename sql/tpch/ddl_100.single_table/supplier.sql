@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS tpch.supplier;
-CREATE TABLE tpch.supplier (
+DROP TABLE IF EXISTS __SCHEMA__.supplier;
+CREATE TABLE __SCHEMA__.supplier (
     s_suppkey   INT NOT NULL,
     s_name      VARCHAR(25) NOT NULL,
     s_address   VARCHAR(40) NOT NULL,

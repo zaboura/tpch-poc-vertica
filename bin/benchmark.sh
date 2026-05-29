@@ -47,7 +47,7 @@ while read -r query; do
     # Skip empty lines or comment lines
     [[ -z "$query" || "$query" =~ ^-- ]] && continue
 
-    query="${query//tpch./${schema}.}"
+    query="${query//__SCHEMA__/${schema}}"
 
     sync  # flush disk caches (optional)
     echo -ne "Q$QUERY_NUM\t" | tee -a result.csv

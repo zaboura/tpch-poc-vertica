@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS tpch.orders;
-CREATE TABLE tpch.orders (
+DROP TABLE IF EXISTS __SCHEMA__.orders;
+CREATE TABLE __SCHEMA__.orders (
     o_orderkey      INT NOT NULL,
     o_orderdate     DATE NOT NULL,
     o_custkey       INT NOT NULL,

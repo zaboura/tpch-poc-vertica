@@ -1,4 +1,4 @@
-CREATE TABLE tpch.orders (
+CREATE TABLE __SCHEMA__.orders (
     o_orderkey      INT NOT NULL,
     o_custkey       INT NOT NULL,
     o_orderstatus   VARCHAR(1) NOT NULL,

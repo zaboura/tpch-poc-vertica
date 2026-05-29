@@ -1,4 +1,4 @@
-CREATE TABLE tpch.lineitem (
+CREATE TABLE __SCHEMA__.lineitem (
     l_linenumber  INT NOT NULL,
     l_partkey     INT NOT NULL,
     l_suppkey     INT NOT NULL,

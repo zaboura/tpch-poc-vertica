@@ -1,8 +1,8 @@
-DROP SCHEMA IF EXISTS tpch CASCADE;
-CREATE SCHEMA IF NOT EXISTS tpch;
+DROP SCHEMA IF EXISTS __SCHEMA__ CASCADE;
+CREATE SCHEMA IF NOT EXISTS __SCHEMA__;
 
-DROP TABLE IF EXISTS tpch.customer;
-CREATE TABLE tpch.customer (
+DROP TABLE IF EXISTS __SCHEMA__.customer;
+CREATE TABLE __SCHEMA__.customer (
     c_custkey     INT NOT NULL,
     c_name        VARCHAR(25) NOT NULL,
     c_address     VARCHAR(40) NOT NULL,
@@ -13,8 +13,8 @@ CREATE TABLE tpch.customer (
     c_comment     VARCHAR(117) NOT NULL
 );
 
-DROP TABLE IF EXISTS tpch.lineitem;
-CREATE TABLE tpch.lineitem (
+DROP TABLE IF EXISTS __SCHEMA__.lineitem;
+CREATE TABLE __SCHEMA__.lineitem (
     l_linenumber  INT NOT NULL,
     l_partkey     INT NOT NULL,
     l_suppkey     INT NOT NULL,
@@ -33,16 +33,16 @@ CREATE TABLE tpch.lineitem (
     l_comment      VARCHAR(44) NOT NULL
 );
 
-DROP TABLE IF EXISTS tpch.nation;
-CREATE TABLE tpch.nation (
+DROP TABLE IF EXISTS __SCHEMA__.nation;
+CREATE TABLE __SCHEMA__.nation (
     n_nationkey  INT NOT NULL,
     n_name       VARCHAR(25) NOT NULL,
     n_regionkey  INT NOT NULL,
     n_comment    VARCHAR(152)
 );
 
-DROP TABLE IF EXISTS tpch.orders;
-CREATE TABLE tpch.orders (
+DROP TABLE IF EXISTS __SCHEMA__.orders;
+CREATE TABLE __SCHEMA__.orders (
     o_orderkey      INT NOT NULL,
     o_custkey       INT NOT NULL,
     o_orderstatus   VARCHAR(1) NOT NULL,
@@ -54,8 +54,8 @@ CREATE TABLE tpch.orders (
     o_comment       VARCHAR(79) NOT NULL
 );
 
-DROP TABLE IF EXISTS tpch.part;
-CREATE TABLE tpch.part (
+DROP TABLE IF EXISTS __SCHEMA__.part;
+CREATE TABLE __SCHEMA__.part (
     p_partkey     INT NOT NULL,
     p_name        VARCHAR(55) NOT NULL,
     p_mfgr        VARCHAR(25) NOT NULL,
@@ -67,8 +67,8 @@ CREATE TABLE tpch.part (
     p_comment     VARCHAR(23) NOT NULL
 );
 
-DROP TABLE IF EXISTS tpch.partsupp;
-CREATE TABLE tpch.partsupp (
+DROP TABLE IF EXISTS __SCHEMA__.partsupp;
+CREATE TABLE __SCHEMA__.partsupp (
     ps_partkey     INT NOT NULL,
     ps_suppkey     INT NOT NULL,
     ps_availqty    INT NOT NULL,
@@ -76,15 +76,15 @@ CREATE TABLE tpch.partsupp (
     ps_comment     VARCHAR(199) NOT NULL
 );
 
-DROP TABLE IF EXISTS tpch.region;
-CREATE TABLE tpch.region (
+DROP TABLE IF EXISTS __SCHEMA__.region;
+CREATE TABLE __SCHEMA__.region (
     r_regionkey INT NOT NULL,
     r_name      VARCHAR(25) NOT NULL,
     r_comment   VARCHAR(152)
 );
 
-DROP TABLE IF EXISTS tpch.supplier;
-CREATE TABLE tpch.supplier (
+DROP TABLE IF EXISTS __SCHEMA__.supplier;
+CREATE TABLE __SCHEMA__.supplier (
     s_suppkey   INT NOT NULL,
     s_name      VARCHAR(25) NOT NULL,
     s_address   VARCHAR(40) NOT NULL,
@@ -94,13 +94,13 @@ CREATE TABLE tpch.supplier (
     s_comment   VARCHAR(101) NOT NULL
 );
 
-DROP VIEW IF EXISTS tpch.revenue0;
-CREATE VIEW tpch.revenue0 (supplier_no, total_revenue) AS
+DROP VIEW IF EXISTS __SCHEMA__.revenue0;
+CREATE VIEW __SCHEMA__.revenue0 (supplier_no, total_revenue) AS
 SELECT
     l_suppkey,
     SUM(l_extendedprice * (1 - l_discount))
 FROM
-    tpch.lineitem
+    __SCHEMA__.lineitem
 WHERE
     l_shipdate >= DATE '1996-01-01'
     AND l_shipdate < DATE '1996-01-01' + INTERVAL '3 MONTH'

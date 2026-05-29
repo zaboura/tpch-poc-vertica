@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS tpch.customer;
-CREATE TABLE tpch.customer (
+DROP TABLE IF EXISTS __SCHEMA__.customer;
+CREATE TABLE __SCHEMA__.customer (
     c_custkey     INT NOT NULL,
     c_name        VARCHAR(25) NOT NULL,
     c_address     VARCHAR(40) NOT NULL,

@@ -74,15 +74,7 @@ class VerticaLib(object):
 
     def apply_configured_schema(self, sql):
         schema = self.validate_schema_name(self.schema)
-
-        sql = re.sub(r"\btpch\.", "%s." % schema, sql, flags=re.IGNORECASE)
-        sql = re.sub(
-            r"(\b(?:DROP|CREATE)\s+SCHEMA\s+(?:IF\s+(?:NOT\s+)?EXISTS\s+)?)tpch\b",
-            r"\1%s" % schema,
-            sql,
-            flags=re.IGNORECASE,
-        )
-        return sql
+        return sql.replace("__SCHEMA__", schema)
 
 
     def execute_sql(self, sql, sql_type):

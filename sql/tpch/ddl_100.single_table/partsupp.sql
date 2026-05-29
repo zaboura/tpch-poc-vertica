@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS tpch.partsupp;
-CREATE TABLE tpch.partsupp (
+DROP TABLE IF EXISTS __SCHEMA__.partsupp;
+CREATE TABLE __SCHEMA__.partsupp (
     ps_partkey     INT NOT NULL,
     ps_suppkey     INT NOT NULL,
     ps_availqty    INT NOT NULL,
